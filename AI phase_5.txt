@@ -1,1 +1,31 @@
-nnnn
+
+import pandas as pd
+import matplotlib.pyplot as plt
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import mean_squared_error
+import numpy as np
+data = pd.read_csv('Data_Gov_Tamil_Nadu.csv')
+
+data['CORPORATE_IDENTIFICATION_NUMBER'] = pd.to_datetime(data['CORPORATE_IDENTIFICATION_NUMBER'])
+data.set_index('CORPORATE_IDENTIFICATION_NUMBER', inplace=True)
+
+result = seasonal_decompose(data['Registrations'], model='additive')
+result.plot()
+plt.show()
+
+train_size = int(len(data) * 0.8)
+train, test = data.iloc[:train_size], data.iloc[train_size:]
+	
+model = ExponentialSmoothing(train, seasonal='add', seasonal_periods=12)
+model_fit = model.fit(optimized=True, use_brute=True)
+forecast = model_fit.forecast(len(test))
+
+mse = mean_squared_error(test, forecast)
+rmse = np.sqrt(mse)
+print("Root Mean Squared Error: {rmse}")
+
+plt.plot(train, label='Training Data')
+plt.plot(test, label='Testing Data')
+plt.plot(forecast, label='Forecast')
+plt.legend()
+plt.show()
